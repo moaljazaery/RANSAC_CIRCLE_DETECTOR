@@ -1,3 +1,18 @@
+./laplacian /home/moaljazaery/Desktop/28.jpg 160 0.7 1000 0
+./laplacian /home/moaljazaery/Desktop/29.jpg 70 0.4 80000 0
+
+
+// circleDetector.cpp
+//
+// Kevin Hughes
+//
+// 2012
+//
+// This is an implementation of the circle detction RANSAC algorithm
+// described in "An efficient randomized algorithm for detecting circles"
+// by Chen, T.C. and Chung, K.L.
+//
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -24,55 +39,35 @@ void circleRANSAC(Mat &image, vector<Vec3f> &circles, double canny_threshold, do
 bool debug=false;
 int main(int argc, char *argv[])
 {
-/*
 	if(argc != 6)
 	{
 		cout << "Usage: " << argv[0] << "<image file> <canny threshold> <circle threshold> <iterations> <debug>" << endl;
 		return -1;
 	}
-*/
-	// init with best result
+
+	// collect arguemtns
 	string filename = argv[1];
-	double canny_threshold = 60; //atof(argv[2]);
-	double circle_threshold = 0.4; //atof(argv[3]);
-	int iterations = 100000; //atoi(argv[4]);
-	debug = bool(atof(argv[2]));
+	double canny_threshold = atof(argv[2]);
+	double circle_threshold = atof(argv[3]);
+	int iterations = atoi(argv[4]);
+	debug = bool(atof(argv[5]));
 
 	Mat image = imread(filename,cv::IMREAD_GRAYSCALE);
+	if(image.rows >500)
+	 pyrDown(image,image);
+	 if(image.rows >500)
+	 pyrDown(image,image);
 
-	//scale images arround 500 px
-	while(image.rows >500)
-        pyrDown(image,image);
-
-
-
-
-	//Sharp the image
     Mat blurimage=image.clone();
     cv::GaussianBlur(image, blurimage, cv::Size(5, 5),2);
     cv::addWeighted(image, 1.5, blurimage, -0.5,0,image);
     cv::GaussianBlur(image, image, cv::Size(3, 3), 3,3);
 
+	cout << "aaaa";
 	vector<Vec3f> circles;
 
 	const clock_t start = clock();
-
-	//find semi Circles with 40% threshold
-	circle_threshold=0.4;
 	circleRANSAC(image, circles, canny_threshold, circle_threshold, iterations);
-
-	//change the threshold to find best 2 circles using RANSAC
-	while(int(circles.size()) > 2)
-    {
-
-        circleRANSAC(image, circles, canny_threshold, circle_threshold, iterations);
-
-        circle_threshold+=0.1;
-
-    }
-
-
-    //Print Result
 	clock_t end = clock();
 
 	cout << "Found " << (int)circles.size() << " Circles." << endl;
@@ -153,8 +148,8 @@ void circleRANSAC(Mat &image, std::vector<Vec3f> &circles, double canny_threshol
 	cv::RNG rng;
 	int min_point_separation = 10; // change to be relative to image size?
 	int colinear_tolerance = 1; // make sure points are not on a line
-	int radius_tolerance = 1; // change to be relative to image size?
-	int points_threshold = 8; //should always be greater than 4
+	int radius_tolerance = 3; // change to be relative to image size?
+	int points_threshold = 10; //should always be greater than 4
 	//double min_circle_separation = 10; //reject a circle if it is too close to a previously found circle
 	//double min_radius = 10.0; //minimum radius for a circle to not be rejected
 
@@ -219,7 +214,6 @@ void circleRANSAC(Mat &image, std::vector<Vec3f> &circles, double canny_threshol
 		y = m2_AB * x + b2_AB;
 		center = Point2d(x,y);
 		radius = cv::norm(center - pointB);
-		if(radius<15) continue;
 
 		/// geometry debug image
 		if(debug)

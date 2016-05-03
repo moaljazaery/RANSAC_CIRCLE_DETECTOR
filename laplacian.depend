@@ -36,3 +36,12 @@
 	"cxcore.h"
 	"opencv2/core.hpp"
 
+1458156447 source:/home/moaljazaery/Dev/CV2016/circleDetector/main.cpp
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
+	<opencv2/highgui/highgui.hpp>
+	<iostream>
+	<vector>
+	<string>
+	<time.h>
+
